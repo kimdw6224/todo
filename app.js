@@ -98,6 +98,9 @@ function initTheme() {
 }
 
 function applyTheme(theme) {
+    // Enable smooth transition for all elements
+    document.documentElement.classList.add('theme-transitioning');
+
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(THEME_KEY, theme);
     if (theme === 'light') {
@@ -110,6 +113,11 @@ function applyTheme(theme) {
     // Update meta theme-color
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = theme === 'light' ? '#f5f5f5' : '#000000';
+
+    // Remove transition class after animation completes
+    setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+    }, 500);
 }
 
 function toggleTheme() {
