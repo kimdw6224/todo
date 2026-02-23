@@ -3,7 +3,7 @@
  * Provides offline caching and app-shell strategy
  */
 
-const CACHE_NAME = 'mytasks-v4';
+const CACHE_NAME = 'mytasks-v5';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -101,7 +101,7 @@ self.addEventListener('message', (event) => {
             renotify: true,
             vibrate: [200, 100, 200],
             icon: './icons/icon-192.png',
-            badge: './icons/icon-96.png',
+            badge: './icons/badge-96.png',
             requireInteraction: false,
         });
     }

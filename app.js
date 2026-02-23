@@ -331,7 +331,7 @@ function openEditModal(taskId) {
 }
 
 function setReminderUI(minutes) {
-    const presets = [0, 5, 10, 15, 30, 60];
+    const presets = [0, 1, 2, 5, 10, 15, 30, 60];
     els.reminderSelector.querySelectorAll('.reminder-btn').forEach(b => b.classList.remove('active'));
 
     if (presets.includes(minutes)) {
