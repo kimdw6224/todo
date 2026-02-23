@@ -475,37 +475,95 @@ function toggleReminder(id) {
 }
 
 // ===========================
-// Reminder System
+// Reminder System (Mobile-compatible)
 // ===========================
 function startReminder(task) {
     stopReminder(task.id);
     const ms = task.reminderMinutes * 60 * 1000;
-    reminderTimers[task.id] = setInterval(() => {
+    // Store next fire time for persistence across background/refresh
+    task.nextFireTime = Date.now() + ms;
+    save();
+    scheduleNextReminder(task);
+}
+
+function scheduleNextReminder(task) {
+    stopReminder(task.id);
+    if (!task.reminderActive || task.completed || task.reminderMinutes <= 0) return;
+
+    const now = Date.now();
+    const ms = task.reminderMinutes * 60 * 1000;
+    let nextFire = task.nextFireTime || (now + ms);
+
+    // If we missed one or more fires (app was backgrounded), fire immediately
+    if (nextFire <= now) {
         sendNotification(task);
         showToast('⏰ 할 일 알림', task.text);
-    }, ms);
+        // Schedule next from now
+        nextFire = now + ms;
+        task.nextFireTime = nextFire;
+        save();
+    }
+
+    const delay = nextFire - now;
+    reminderTimers[task.id] = setTimeout(() => {
+        sendNotification(task);
+        showToast('⏰ 할 일 알림', task.text);
+        // Schedule the next one
+        task.nextFireTime = Date.now() + ms;
+        save();
+        scheduleNextReminder(task);
+    }, delay);
 }
 
 function stopReminder(id) {
-    if (reminderTimers[id]) { clearInterval(reminderTimers[id]); delete reminderTimers[id]; }
+    if (reminderTimers[id]) {
+        clearTimeout(reminderTimers[id]);
+        delete reminderTimers[id];
+    }
 }
 
 function restoreReminders() {
     tasks.forEach(t => {
-        if (t.reminderActive && !t.completed && t.reminderMinutes > 0) startReminder(t);
+        if (t.reminderActive && !t.completed && t.reminderMinutes > 0) {
+            scheduleNextReminder(t);
+        }
+    });
+
+    // Re-sync timers when app comes back to foreground
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            tasks.forEach(t => {
+                if (t.reminderActive && !t.completed && t.reminderMinutes > 0) {
+                    scheduleNextReminder(t);
+                }
+            });
+        }
     });
 }
 
 function sendNotification(task) {
     if (!canNotify()) return;
     const pLabel = { low: '낮음', medium: '보통', high: '높음' };
-    new Notification('📋 To-Do', {
-        body: `${task.text}\n우선순위: ${pLabel[task.priority] || task.priority}`,
-        tag: `task-${task.id}`,
-        renotify: true,
-        vibrate: [200, 100, 200],
-        badge: '/icons/icon-96.png',
-    });
+    const body = `${task.text}\n우선순위: ${pLabel[task.priority] || task.priority}`;
+
+    // Use Service Worker for notifications (required on Android)
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SHOW_NOTIFICATION',
+            title: '📋 To-Do',
+            body: body,
+            tag: `task-${task.id}`,
+        });
+    } else {
+        // Fallback for desktop or if SW not ready
+        try {
+            new Notification('📋 To-Do', {
+                body: body,
+                tag: `task-${task.id}`,
+                renotify: true,
+            });
+        } catch (e) { }
+    }
 }
 
 // ===========================

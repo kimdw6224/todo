@@ -3,7 +3,7 @@
  * Provides offline caching and app-shell strategy
  */
 
-const CACHE_NAME = 'mytasks-v2';
+const CACHE_NAME = 'mytasks-v3';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -85,6 +85,39 @@ self.addEventListener('fetch', (event) => {
                     }
                     return new Response('Offline', { status: 503 });
                 });
+        })
+    );
+});
+
+// ===========================
+// Push Notifications via postMessage
+// ===========================
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+        const { title, body, tag } = event.data;
+        self.registration.showNotification(title, {
+            body: body,
+            tag: tag || 'todo-reminder',
+            renotify: true,
+            vibrate: [200, 100, 200],
+            icon: './icons/icon-192.png',
+            badge: './icons/icon-96.png',
+            requireInteraction: false,
+        });
+    }
+});
+
+// Handle notification click — focus the app
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                if (client.url.includes('index.html') && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            return clients.openWindow('./index.html');
         })
     );
 });
