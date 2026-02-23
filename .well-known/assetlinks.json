@@ -5,9 +5,9 @@
         ],
         "target": {
             "namespace": "android_app",
-            "package_name": "com.mytasks.app",
+            "package_name": "io.github.kimdw6224.todo",
             "sha256_cert_fingerprints": [
-                "TODO: Play Console에서 앱 서명 키의 SHA-256 지문을 여기에 붙여넣으세요"
+                "45:55:74:17:FF:3A:85:FB:8F:94:57:98:61:BA:9A:26:53:8F:54:17:A8:2D:96:08:FD:9A:12:33:88:16:F0:06"
             ]
         }
     }
