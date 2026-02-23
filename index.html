@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="깔끔하고 세련된 모바일 할 일 관리 앱. 우선순위, 카테고리, 반복 알림 기능.">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="color-scheme" content="dark">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>My Tasks — 할 일 관리</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div class="app-container" id="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <div class="header-greeting">
+                    <p class="greeting-text" id="greeting-text">오늘도 화이팅!</p>
+                    <h1 class="app-title">My Tasks</h1>
+                </div>
+                <div class="header-actions">
+                    <button id="theme-toggle-btn" class="icon-btn" aria-label="테마 전환" title="라이트/다크 모드">
+                        <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="display:none">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                        </svg>
+                    </button>
+                    <button id="clear-done-btn" class="icon-btn" aria-label="완료된 항목 정리" title="완료된 항목 정리">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Progress bar -->
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span class="stat" id="stat-total">0 tasks</span>
+                    <span class="stat" id="stat-done">0 done</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Tabs -->
+        <nav class="filter-tabs" id="filter-tabs">
+            <button class="tab active" data-filter="all">
+                <span class="tab-label">전체</span>
+                <span class="tab-count" id="count-all">0</span>
+            </button>
+            <button class="tab" data-filter="active">
+                <span class="tab-label">진행중</span>
+                <span class="tab-count" id="count-active">0</span>
+            </button>
+            <button class="tab" data-filter="completed">
+                <span class="tab-label">완료</span>
+                <span class="tab-count" id="count-completed">0</span>
+            </button>
+        </nav>
+
+        <!-- Task List -->
+        <main class="task-list-container">
+            <ul class="task-list" id="task-list"></ul>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                    </svg>
+                </div>
+                <p class="empty-title">할 일이 없습니다</p>
+                <p class="empty-subtitle">+ 버튼을 눌러 새로운 할 일을 추가하세요</p>
+            </div>
+        </main>
+
+        <!-- FAB -->
+        <button class="fab" id="add-task-btn" aria-label="할 일 추가">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+        </button>
+
+        <!-- Modal -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal" id="add-task-modal" role="dialog" aria-labelledby="modal-title">
+                <div class="modal-handle"></div>
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modal-title">새로운 할 일</h2>
+                    <button class="icon-btn modal-close" id="modal-close-btn" aria-label="닫기">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <form id="task-form" autocomplete="off">
+                    <div class="form-group">
+                        <label class="form-label" for="task-input">할 일</label>
+                        <input type="text" id="task-input" class="form-input" placeholder="무엇을 해야 하나요?" required
+                            maxlength="200">
+                        <div class="char-count"><span id="char-count">0</span>/200</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">우선순위</label>
+                        <div class="priority-selector" id="priority-selector">
+                            <button type="button" class="priority-btn" data-priority="low"><span
+                                    class="priority-dot low"></span>낮음</button>
+                            <button type="button" class="priority-btn active" data-priority="medium"><span
+                                    class="priority-dot medium"></span>보통</button>
+                            <button type="button" class="priority-btn" data-priority="high"><span
+                                    class="priority-dot high"></span>높음</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="task-category">카테고리</label>
+                        <select id="task-category" class="form-select">
+                            <option value="none">없음</option>
+                            <option value="work">💼 업무</option>
+                            <option value="personal">👤 개인</option>
+                            <option value="shopping">🛒 쇼핑</option>
+                            <option value="health">💪 건강</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">알림 반복</label>
+                        <div class="reminder-selector" id="reminder-selector">
+                            <button type="button" class="reminder-btn active" data-reminder="0">없음</button>
+                            <button type="button" class="reminder-btn" data-reminder="5">5분</button>
+                            <button type="button" class="reminder-btn" data-reminder="10">10분</button>
+                            <button type="button" class="reminder-btn" data-reminder="15">15분</button>
+                            <button type="button" class="reminder-btn" data-reminder="30">30분</button>
+                            <button type="button" class="reminder-btn" data-reminder="60">1시간</button>
+                            <button type="button" class="reminder-btn" data-reminder="custom">직접입력</button>
+                        </div>
+                        <div class="custom-reminder-input" id="custom-reminder-wrapper" style="display: none;">
+                            <input type="number" id="custom-reminder-input" class="form-input" min="1" max="1440"
+                                placeholder="분 단위 (1~1440)">
+                            <span class="custom-reminder-unit">분</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submit-task-btn">추가하기</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div class="confirm-overlay" id="confirm-overlay">
+            <div class="confirm-dialog" role="alertdialog" aria-labelledby="confirm-title">
+                <p class="confirm-title" id="confirm-title">이 할 일을 삭제하시겠습니까?</p>
+                <p class="confirm-body" id="confirm-body"></p>
+                <div class="confirm-actions">
+                    <button class="confirm-btn cancel" id="confirm-cancel">취소</button>
+                    <button class="confirm-btn danger" id="confirm-delete">삭제</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
