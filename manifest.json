@@ -2,6 +2,7 @@
     "name": "To-Do",
     "short_name": "To-Do",
     "description": "깔끔하고 세련된 모바일 To-Do 리스트 앱. 할 일 관리, 우선순위 설정, 알림 반복 기능을 제공합니다.",
+    "id": "/todo/",
     "start_url": "./index.html",
     "scope": ".",
     "display": "standalone",
@@ -13,6 +14,9 @@
         "productivity",
         "utilities"
     ],
+    "iarc_rating_id": "",
+    "related_applications": [],
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "icons/icon-72.png",
@@ -78,18 +82,17 @@
     "screenshots": [
         {
             "src": "screenshots/screenshot-mobile.png",
-            "sizes": "390x844",
+            "sizes": "750x1125",
             "type": "image/png",
             "form_factor": "narrow",
             "label": "To-Do 할 일 관리 화면"
         },
         {
             "src": "screenshots/screenshot-wide.png",
-            "sizes": "1280x720",
+            "sizes": "1899x939",
             "type": "image/png",
             "form_factor": "wide",
             "label": "To-Do 태블릿 화면"
         }
-    ],
-    "prefer_related_applications": false
+    ]
 }
