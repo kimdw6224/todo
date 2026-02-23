@@ -80,9 +80,13 @@ function init() {
     renderTasks();
     updateStats();
     bindEvents();
-    requestNotificationPermission();
-    restoreReminders();
     registerServiceWorker();
+    // Delay restoring reminders until SW is ready
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(() => restoreReminders());
+    } else {
+        restoreReminders();
+    }
 }
 
 // ===========================
@@ -138,22 +142,43 @@ function registerServiceWorker() {
 // Greeting
 // ===========================
 function updateGreeting() {
-    const hour = new Date().getHours();
+    const now = new Date();
+    const hour = now.getHours();
     let msg;
     if (hour < 6) msg = '좋은 새벽이에요 🌙';
     else if (hour < 12) msg = '좋은 아침이에요 ☀️';
     else if (hour < 18) msg = '좋은 오후에요 🌤️';
     else msg = '좋은 저녁이에요 🌙';
     els.greetingText.textContent = msg;
+
+    // Display today's date as app title
+    const appTitle = document.querySelector('.app-title');
+    if (appTitle) {
+        appTitle.textContent = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()}`;
+    }
 }
 
 // ===========================
 // Notification
 // ===========================
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
+async function ensureNotificationPermission() {
+    if (!('Notification' in window)) {
+        showToast('알림 미지원', '이 브라우저는 알림을 지원하지 않습니다');
+        return false;
     }
+    if (Notification.permission === 'granted') return true;
+    if (Notification.permission === 'denied') {
+        showToast('알림 차단됨', '설정에서 알림 권한을 허용해주세요');
+        return false;
+    }
+    // Must be called from user gesture
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+        showToast('알림 허용됨', '알림이 정상적으로 설정됩니다');
+        return true;
+    }
+    showToast('알림 거부됨', '알림을 받으려면 권한을 허용해주세요');
+    return false;
 }
 
 function canNotify() {
@@ -355,11 +380,20 @@ function hideDeleteConfirm() {
 // ===========================
 // CRUD
 // ===========================
-function addTask() {
+async function addTask() {
     const text = els.taskInput.value.trim();
     if (!text) return;
 
     if (isCustomReminder) selectedReminder = parseInt(els.customReminderInput.value, 10) || 0;
+
+    // Request permission before creating task with reminder
+    if (selectedReminder > 0) {
+        const granted = await ensureNotificationPermission();
+        if (!granted) {
+            // Still create the task but without active reminder
+            selectedReminder = 0;
+        }
+    }
 
     const task = {
         id: genId(),
@@ -453,13 +487,19 @@ function clearCompletedTasks() {
     showToast('정리 완료', `${doneCount}개 항목을 삭제했습니다`);
 }
 
-function toggleReminder(id) {
+async function toggleReminder(id) {
     const task = tasks.find(t => t.id === id);
     if (!task || task.completed) return;
 
     if (task.reminderMinutes === 0) {
         showToast('알림 미설정', '수정 버튼을 눌러 알림을 설정하세요');
         return;
+    }
+
+    // Request permission on user gesture (required for Android)
+    if (!task.reminderActive) {
+        const granted = await ensureNotificationPermission();
+        if (!granted) return;
     }
 
     task.reminderActive = !task.reminderActive;
@@ -541,29 +581,37 @@ function restoreReminders() {
     });
 }
 
-function sendNotification(task) {
+async function sendNotification(task) {
     if (!canNotify()) return;
     const pLabel = { low: '낮음', medium: '보통', high: '높음' };
     const body = `${task.text}\n우선순위: ${pLabel[task.priority] || task.priority}`;
 
     // Use Service Worker for notifications (required on Android)
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            type: 'SHOW_NOTIFICATION',
-            title: '📋 To-Do',
-            body: body,
-            tag: `task-${task.id}`,
-        });
-    } else {
-        // Fallback for desktop or if SW not ready
-        try {
-            new Notification('📋 To-Do', {
+    try {
+        let sw = navigator.serviceWorker && navigator.serviceWorker.controller;
+        if (!sw && navigator.serviceWorker) {
+            const reg = await navigator.serviceWorker.ready;
+            sw = reg.active;
+        }
+        if (sw) {
+            sw.postMessage({
+                type: 'SHOW_NOTIFICATION',
+                title: '📋 To-Do',
                 body: body,
                 tag: `task-${task.id}`,
-                renotify: true,
             });
-        } catch (e) { }
-    }
+            return;
+        }
+    } catch (e) { }
+
+    // Fallback for desktop
+    try {
+        new Notification('📋 To-Do', {
+            body: body,
+            tag: `task-${task.id}`,
+            renotify: true,
+        });
+    } catch (e) { }
 }
 
 // ===========================

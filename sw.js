@@ -3,7 +3,7 @@
  * Provides offline caching and app-shell strategy
  */
 
-const CACHE_NAME = 'mytasks-v3';
+const CACHE_NAME = 'mytasks-v4';
 const STATIC_ASSETS = [
     './',
     './index.html',
