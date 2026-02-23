@@ -1,5 +1,5 @@
 /**
- * My Tasks — Production PWA
+ * To-Do — Production PWA
  * Android-focused To-Do List App
  * 
  * Features:
@@ -491,7 +491,7 @@ function restoreReminders() {
 function sendNotification(task) {
     if (!canNotify()) return;
     const pLabel = { low: '낮음', medium: '보통', high: '높음' };
-    new Notification('📋 My Tasks', {
+    new Notification('📋 To-Do', {
         body: `${task.text}\n우선순위: ${pLabel[task.priority] || task.priority}`,
         tag: `task-${task.id}`,
         renotify: true,

@@ -1,5 +1,5 @@
 /* ===========================
-   My Tasks — Production CSS
+   To-Do — Production CSS
    Light / Dark Theme Support
    =========================== */
 :root {
@@ -184,6 +184,7 @@ ul {
     top: 0;
     z-index: 100;
     background: var(--bg-primary);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .header-top {

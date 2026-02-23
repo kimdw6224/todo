@@ -1,16 +1,19 @@
 /**
- * Service Worker for My Tasks PWA
+ * Service Worker for To-Do PWA
  * Provides offline caching and app-shell strategy
  */
 
-const CACHE_NAME = 'mytasks-v1';
+const CACHE_NAME = 'mytasks-v2';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/styles.css',
-    '/app.js',
-    '/manifest.json',
-    '/icons/icon.svg'
+    './',
+    './index.html',
+    './styles.css',
+    './app.js',
+    './manifest.json',
+    './privacy-policy.html',
+    './icons/icon.svg',
+    './icons/icon-192.png',
+    './icons/icon-512.png'
 ];
 
 // Install: cache static assets
@@ -78,7 +81,7 @@ self.addEventListener('fetch', (event) => {
                 .catch(() => {
                     // Fallback for navigation requests
                     if (request.mode === 'navigate') {
-                        return caches.match('/index.html');
+                        return caches.match('./index.html');
                     }
                     return new Response('Offline', { status: 503 });
                 });
