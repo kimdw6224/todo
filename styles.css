@@ -143,7 +143,7 @@ html {
 
 body {
     font-family: var(--font);
-    background: var(--bg-primary);
+    background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;
     min-height: 100vh;
@@ -194,7 +194,7 @@ ul {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--bg-primary);
+    background-color: var(--bg-primary);
 }
 
 .header-top {
