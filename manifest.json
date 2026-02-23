@@ -4,7 +4,7 @@
     "description": "깔끔하고 세련된 모바일 To-Do 리스트 앱. 할 일 관리, 우선순위 설정, 알림 반복 기능을 제공합니다.",
     "id": "/todo/",
     "start_url": "./index.html",
-    "scope": ".",
+    "scope": "./",
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#000000",
@@ -15,7 +15,17 @@
         "utilities"
     ],
     "iarc_rating_id": "",
-    "related_applications": [],
+    "serviceworker": {
+        "src": "./sw.js",
+        "scope": "./"
+    },
+    "related_applications": [
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=com.todo.app",
+            "id": "com.todo.app"
+        }
+    ],
     "prefer_related_applications": false,
     "icons": [
         {
